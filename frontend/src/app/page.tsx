@@ -1,0 +1,158 @@
+'use client';
+
+import { useState } from 'react';
+import { FileUpload } from '@/components/file-upload';
+import { ChatInterface } from '@/components/chat-interface';
+import { LoginForm } from '@/components/auth/login-form';
+import { UserMenu } from '@/components/auth/user-menu';
+import { useAuth } from '@/hooks/use-auth';
+import { Card } from '@/components/ui/card';
+import { FileText, MessageSquare } from 'lucide-react';
+
+export default function DocumentChatApp() {
+  const { user, login, logout, isLoading } = useAuth();
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  // files
+  // const handleFilesUploaded = async (files: File[]) => {
+  //   setUploadedFiles((prev) => [...prev, ...files]);
+
+  //   const formData = new FormData();
+  //   files.forEach((file) => {
+  //     formData.append('files', file);
+  //   });
+
+  //   try {
+  //     const response = await fetch('http://localhost:8000/uploadfile', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Upload failed');
+  //     }
+
+  //     const data = await response.json();
+  //     console.log('Upload success:', data);
+  //   } catch (error) {
+  //     console.error('Error uploading files:', error);
+  //   }
+  // };
+
+  // file
+  const handleFilesUploaded = async (files: File[]) => {
+    setUploadedFiles((prev) => [...prev, ...files]);
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('http://localhost:8000/uploadfile/', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const data = await response.json();
+        console.log('Upload success:', data);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-accent'></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginForm onLogin={login} />;
+  }
+
+  return (
+    <div className='min-h-screen bg-background'>
+      {/* Header */}
+      <header className='border-b bg-card'>
+        <div className='container mx-auto px-4 py-3 flex items-center justify-between'>
+          <div className='flex items-center space-x-3'>
+            <div className='w-8 h-8 bg-accent rounded-lg flex items-center justify-center'>
+              <FileText className='h-4 w-4 text-accent-foreground' />
+            </div>
+            <div>
+              <h1 className='text-lg font-semibold'>Document Chat</h1>
+              <p className='text-sm text-muted-foreground'>
+                AI-powered document analysis
+              </p>
+            </div>
+          </div>
+          <UserMenu user={user} onLogout={logout} />
+        </div>
+      </header>
+
+      <div className='container mx-auto p-4 h-[calc(100vh-80px)]'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 h-full'>
+          {/* File Upload Panel */}
+          <div className='lg:col-span-1 space-y-4'>
+            <Card className='p-4'>
+              <div className='flex items-center space-x-2 mb-4'>
+                <FileText className='h-5 w-5 text-accent' />
+                <h2 className='text-lg font-medium'>Documents</h2>
+              </div>
+              <FileUpload onFilesUploaded={handleFilesUploaded} />
+            </Card>
+
+            {/* File Status */}
+            {uploadedFiles.length > 0 && (
+              <Card className='p-4'>
+                <h3 className='font-medium mb-2'>Ready for Analysis</h3>
+                <div className='space-y-2'>
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className='flex items-center space-x-2 text-sm'
+                    >
+                      <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                      <span className='truncate'>{file.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* Chat Interface */}
+          <div className='lg:col-span-2'>
+            <Card className='h-full flex flex-col'>
+              <div className='p-4 border-b'>
+                <div className='flex items-center space-x-2'>
+                  <MessageSquare className='h-5 w-5 text-accent' />
+                  <h2 className='text-lg font-medium'>Chat</h2>
+                  {uploadedFiles.length > 0 && (
+                    <span className='text-sm text-muted-foreground'>
+                      ({uploadedFiles.length} document
+                      {uploadedFiles.length !== 1 ? 's' : ''} loaded)
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className='flex-1 min-h-0'>
+                <ChatInterface
+                  uploadedFiles={uploadedFiles}
+                  className='h-full'
+                />
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
