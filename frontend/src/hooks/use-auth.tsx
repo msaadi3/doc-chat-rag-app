@@ -56,11 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await fetch('http://localhost:8000/auth/logout', {
+    const res = await fetch('http://localhost:8000/auth/logout', {
       credentials: 'include',
     });
 
-    setUser(null);
+    if (res.ok) setUser(null);
   };
 
   return (

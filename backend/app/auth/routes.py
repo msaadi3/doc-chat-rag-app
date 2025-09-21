@@ -1,5 +1,6 @@
 from fastapi import Request, APIRouter
 from starlette.responses import RedirectResponse
+from fastapi.responses import JSONResponse
 from authlib.integrations.starlette_client import OAuth
 from app.core.config import settings
 
@@ -22,6 +23,7 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
     authorize_params={"access_type": "offline",
                       "prompt": "consent"}
+
 )
 
 
@@ -47,7 +49,7 @@ async def callback(request: Request):
 @router.get("/logout")
 async def logout(request: Request):
     request.session.clear()
-    return RedirectResponse(url="http://localhost:3000/auth")
+    return JSONResponse(content={"message": "You have been logged out"})
 
 
 @router.get("/me")

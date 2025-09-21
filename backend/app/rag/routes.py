@@ -69,16 +69,32 @@ class QueryRequest(BaseModel):
     top_k: int = 5
 
 
+# Global in-memory store (replace with DB/Redis later if needed)
+user_queries_history = {}  # { email: [query1, query2, ...] }
+
+
+def add_user_query(user_email: str, query: str):
+    if user_email not in user_queries_history:
+        user_queries_history[user_email] = []
+    user_queries_history[user_email].append(query)
+    # optional: limit history size
+    if len(user_queries_history[user_email]) > 20:
+        user_queries_history[user_email].pop(0)
+
+
 @router.post("/query/")
 async def query_documents(
     request: QueryRequest,
     collection: Collection = Depends(get_chroma_collection), user: dict = Depends(get_current_user)
 ):
-    # 1. Embed the query
+
+    #  Save the user query in history
+    add_user_query(user["email"], request.query)
+
+    #  Embed the query
     query_embedding = embed_query(request.query)
 
-    print("user", user)
-    # 2. Search in Chroma
+    #  Search in Chroma
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=request.top_k,
@@ -98,25 +114,44 @@ async def query_documents(
         )
     ]
 
-    # 3. Call LLM with context
-    context = "\n\n".join([chunk["text"] for chunk in matched_chunks])
+    #  Call LLM with context
+    # context = "\n\n".join([chunk["text"] for chunk in matched_chunks])
+
+    # Filter for relevant docs only
+    relevant_chunks = [c for c in matched_chunks if c["score"] < 0.6]
+    context = "\n\n".join([c["text"] for c in relevant_chunks])
+    # Retrieve user queries history
+    history = "\n".join(user_queries_history.get(user["email"], []))
+
     llm = ChatGoogleGenerativeAI(
         google_api_key=settings.gemini_api_key, model="gemini-2.5-pro", )
 
-    prompt = f"""You are an assistant. Use the following context to answer the user’s question:
+    prompt = f"""
+    You are a helpful AI assistant.
 
-    Context:
-    {context}
+    Your job is to:
+    1. Use the provided documents if they are available and relevant.
+    2. Use the user's past queries (conversation history) to understand context.
+    3. If the documents are not useful, still answer the user’s question politely and naturally.
+    4. Keep answers clear, concise, and accurate. Do not make up document content.
 
-    Question:
+    ---
+    User Query History:
+    {history if history else "No prior queries."}
+
+    Relevant Documents:
+    {context if context else "No relevant documents found."}
+
+    Current User Question:
     {request.query}
 
-    Answer:"""
+    ---
+    Please provide the best possible answer below:
+    """
 
     response = llm.invoke(prompt)
 
     return {
-        "query": request.query,
         "answer": response.content,
         "sources": matched_chunks,
     }
