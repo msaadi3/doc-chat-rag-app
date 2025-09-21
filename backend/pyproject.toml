@@ -6,8 +6,11 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aiofiles>=24.1.0",
+    "authlib[starlette]>=1.6.4",
     "chromadb>=1.1.0",
+    "docx2txt>=0.9",
     "fastapi[standard]>=0.116.2",
+    "itsdangerous>=2.2.0",
     "langchain>=0.3.27",
     "langchain-community[pdf]>=0.3.29",
     "langchain-google-genai>=2.1.12",

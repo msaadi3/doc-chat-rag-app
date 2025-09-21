@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/card';
 import { FileText, MessageSquare } from 'lucide-react';
 
-export default function DocumentChatApp() {
+export default function Chat() {
   const { user, login, logout, isLoading } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
@@ -48,9 +48,10 @@ export default function DocumentChatApp() {
       formData.append('file', file);
 
       try {
-        const response = await fetch('http://localhost:8000/uploadfile/', {
+        const response = await fetch('http://localhost:8000/rag/uploadfile/', {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
 
         if (!response.ok) {

@@ -65,8 +65,9 @@ export function ChatInterface({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/query', {
+      const response = await fetch('http://localhost:8000/rag/query', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userMessage.content }),
       });
