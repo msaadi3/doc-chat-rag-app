@@ -19,6 +19,32 @@ export default function Chat() {
   const { user, logout, isLoading } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
+  async function fetchFiles() {
+    // toast.info('Fetching uploaded files, please wait...');
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/get-files`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        toast.error('Failed to fetch files');
+        console.log('Failed to fetch files:', response);
+        throw new Error('Fetch failed');
+      }
+
+      const data = await response.json();
+      console.log('Fetched files:', data.files);
+      // toast.success('Files fetched successfully');
+      setUploadedFiles(data.files);
+    } catch (error) {
+      console.error('Error while fetching files', error);
+    }
+  }
+
   const handleFilesUploaded = async (file: File) => {
     if (uploadedFiles.length == 5) {
       toast.error('You can upload a maximum of 5 files.');
@@ -47,6 +73,7 @@ export default function Chat() {
         throw new Error('Upload failed');
       }
 
+      await fetchFiles();
       toast.success('File uploaded successfully');
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -54,32 +81,9 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    async function fetchFiles() {
-      // toast.info('Fetching uploaded files, please wait...');
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/get-files`,
-          {
-            method: 'GET',
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          toast.error('Failed to fetch files');
-          console.log('Failed to fetch files:', response);
-          throw new Error('Fetch failed');
-        }
-
-        const data = await response.json();
-        console.log('Fetched files:', data.files);
-        // toast.success('Files fetched successfully');
-        setUploadedFiles(data.files);
-      } catch (error) {
-        console.error('Error while fetching files', error);
-      }
+    if (user) {
+      fetchFiles();
     }
-    fetchFiles();
   }, []);
 
   async function deleteFile(documentId: string) {

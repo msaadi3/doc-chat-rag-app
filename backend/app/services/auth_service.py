@@ -35,24 +35,13 @@ class AuthService:
         request.session["user"] = dict(user_info)
 
         response = RedirectResponse(
-            url="https://doc-chat-rag-app-bosg.vercel.app/chat")
-        # response.set_cookie(
-        #     key="session",
-        #     value="YOUR_SESSION_VALUE",
-        #     secure=True,
-        #     httponly=True,
-        #     samesite="none",
-        #     path="/"
-        # )
-        # Create redirect response
-        response = RedirectResponse(
             url="https://doc-chat-rag-app-bosg.vercel.app/chat"
         )
 
         # Manually set the cookie with proper settings for cross-site
         response.set_cookie(
             key="session",
-            value=token,  # Or create a JWT token
+            value=token,
             max_age=86400,  # 24 hours
             secure=True,    # Required for SameSite=None
             httponly=True,  # Prevents XSS
@@ -61,8 +50,6 @@ class AuthService:
         )
 
         return response
-
-        # return RedirectResponse(url="https://doc-chat-rag-app-bosg.vercel.app/chat")
 
     @staticmethod
     async def logout(request: Request) -> JSONResponse:
