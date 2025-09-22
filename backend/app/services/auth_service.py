@@ -50,15 +50,15 @@ class AuthService:
         )
 
         # Manually set the cookie with proper settings for cross-site
-        # response.set_cookie(
-        #     key="user_session",
-        #     value=token,  # Or create a JWT token
-        #     max_age=86400,  # 24 hours
-        #     secure=True,    # Required for SameSite=None
-        #     httponly=True,  # Prevents XSS
-        #     samesite="none",  # Allows cross-site usage
-        #     path="/",
-        # )
+        response.set_cookie(
+            key="session",
+            value=token,  # Or create a JWT token
+            max_age=86400,  # 24 hours
+            secure=True,    # Required for SameSite=None
+            httponly=True,  # Prevents XSS
+            samesite="none",  # Allows cross-site usage
+            path="/",
+        )
 
         return response
 

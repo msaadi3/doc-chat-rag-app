@@ -55,7 +55,7 @@ export default function Chat() {
 
   useEffect(() => {
     async function fetchFiles() {
-      toast.info('Fetching uploaded files, please wait...');
+      // toast.info('Fetching uploaded files, please wait...');
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/files/get-files`,
@@ -73,15 +73,13 @@ export default function Chat() {
 
         const data = await response.json();
         console.log('Fetched files:', data.files);
-        toast.success('Files fetched successfully');
+        // toast.success('Files fetched successfully');
         setUploadedFiles(data.files);
       } catch (error) {
         console.error('Error while fetching files', error);
       }
     }
-    if (user) {
-      fetchFiles();
-    }
+    fetchFiles();
   }, []);
 
   async function deleteFile(documentId: string) {
