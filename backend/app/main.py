@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import logging
 from app.core.config import settings
-from app.auth.routes import router as auth_routers
-from app.rag.routes import router as rag_routers
-from starlette.middleware.sessions import SessionMiddleware
-from files import router as files_routers
+from app.api.auth import router as auth_routers
+from app.api.rag import router as rag_routers
+from app.api.files import router as files_routers
 
 # Initialize logging
 logging.basicConfig(level=logging.ERROR, filename='logs.txt')

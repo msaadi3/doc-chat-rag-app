@@ -158,17 +158,7 @@ export function ChatInterface({
                 <p className='text-sm leading-relaxed whitespace-pre-wrap'>
                   {message.content}
                 </p>
-                {message.documentContext && (
-                  <div className='mt-2 pt-2 border-t border-border/20'>
-                    <p className='text-xs opacity-70'>
-                      Referenced: {message.documentContext.join(', ')}
-                    </p>
-                  </div>
-                )}
               </Card>
-              {/* <span className='text-xs text-muted-foreground px-1'>
-                {formatTime(message.timestamp)}
-              </span> */}
             </div>
           </div>
         ))}

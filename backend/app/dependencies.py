@@ -1,7 +1,17 @@
-from fastapi import Depends, HTTPException, status
-from app.core.chroma_connection import get_chroma_collection
 from chromadb.api.models.Collection import Collection
-from app.auth.dependencies import get_current_user
+from app.core.chroma_connection import get_chroma_collection
+from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status
+
+
+def get_current_user(request: Request):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    return user
 
 
 def enforce_upload_limit(collection: Collection = Depends(get_chroma_collection), user: dict = Depends(get_current_user)):

@@ -73,8 +73,6 @@ export default function Chat() {
 
   async function deleteFile(documentId: string) {
     try {
-      console.log('Deleting file with documentId:', documentId);
-
       const response = await fetch(
         `http://localhost:8000/files/delete-file/${documentId}`,
         {
