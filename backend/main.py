@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.auth.routes import router as auth_routers
 from app.rag.routes import router as rag_routers
 from starlette.middleware.sessions import SessionMiddleware
+from files import router as files_routers
 
 # Initialize logging
 logging.basicConfig(level=logging.ERROR, filename='logs.txt')
@@ -22,11 +23,6 @@ app.add_middleware(
 )
 
 
-# we need this to save temporary code & state in session
-# app.add_middleware(SessionMiddleware, secret_key=settings.session_secret)
-
-# Session middleware stores session data server-side (signed cookie)
-# For cross-site cookies in dev, you may need same_site="none" and https_only=False (dev)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret,
@@ -38,3 +34,4 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_routers)
 app.include_router(rag_routers)
+app.include_router(files_routers)

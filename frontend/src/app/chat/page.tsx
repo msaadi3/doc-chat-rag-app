@@ -1,46 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUpload } from '@/components/file-upload';
 import { ChatInterface } from '@/components/chat-interface';
 import { LoginForm } from '@/components/auth/login-form';
 import { UserMenu } from '@/components/auth/user-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/card';
-import { FileText, MessageSquare } from 'lucide-react';
+import { FileText, MessageSquare, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Chat() {
   const { user, login, logout, isLoading } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  // files
-  // const handleFilesUploaded = async (files: File[]) => {
-  //   setUploadedFiles((prev) => [...prev, ...files]);
-
-  //   const formData = new FormData();
-  //   files.forEach((file) => {
-  //     formData.append('files', file);
-  //   });
-
-  //   try {
-  //     const response = await fetch('http://localhost:8000/uploadfile', {
-  //       method: 'POST',
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Upload failed');
-  //     }
-
-  //     const data = await response.json();
-  //     console.log('Upload success:', data);
-  //   } catch (error) {
-  //     console.error('Error uploading files:', error);
-  //   }
-  // };
-
-  // file
   const handleFilesUploaded = async (files: File[]) => {
+    if (uploadedFiles.length == 5) {
+      toast.error('You can upload a maximum of 5 files.');
+      return;
+    }
+
     setUploadedFiles((prev) => [...prev, ...files]);
 
     for (const file of files) {
@@ -55,16 +34,72 @@ export default function Chat() {
         });
 
         if (!response.ok) {
+          toast.error('Failed to upload file');
+          console.log('Failed to upload file:', response);
           throw new Error('Upload failed');
         }
 
-        const data = await response.json();
-        console.log('Upload success:', data);
+        toast.success('File uploaded successfully');
       } catch (error) {
         console.error('Error uploading file:', error);
       }
     }
   };
+
+  useEffect(() => {
+    async function fetchFiles() {
+      try {
+        const response = await fetch('http://localhost:8000/files/get-files', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          toast.error('Failed to fetch files');
+          console.log('Failed to fetch files:', response);
+          throw new Error('Fetch failed');
+        }
+
+        const data = await response.json();
+        console.log('Fetched files:', data.files);
+
+        setUploadedFiles(data.files);
+      } catch (error) {
+        console.error('Error while fetching files', error);
+      }
+    }
+    fetchFiles();
+  }, []);
+
+  async function deleteFile(documentId: string) {
+    try {
+      console.log('Deleting file with documentId:', documentId);
+
+      const response = await fetch(
+        `http://localhost:8000/files/delete-file/${documentId}`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        console.log('Failed to delete file:', response);
+        toast.error('Failed to delete file');
+        throw new Error('Delete failed');
+      }
+
+      const data = await response.json();
+      console.log('Delete success:', data);
+
+      setUploadedFiles((prev) =>
+        prev.filter((file) => file.document_id !== documentId)
+      );
+      toast.success('File deleted successfully');
+    } catch (error) {
+      console.error('Error deleting file:', error);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -110,18 +145,27 @@ export default function Chat() {
               <FileUpload onFilesUploaded={handleFilesUploaded} />
             </Card>
 
-            {/* File Status */}
             {uploadedFiles.length > 0 && (
               <Card className='p-4'>
                 <h3 className='font-medium mb-2'>Ready for Analysis</h3>
                 <div className='space-y-2'>
                   {uploadedFiles.map((file, index) => (
                     <div
-                      key={index}
-                      className='flex items-center space-x-2 text-sm'
+                      key={file.document_id || index}
+                      className='flex items-center justify-between text-sm'
                     >
-                      <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-                      <span className='truncate'>{file.name}</span>
+                      <div className='flex items-center space-x-2'>
+                        <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                        <span className='truncate'>{file.filename}</span>
+                      </div>
+
+                      {/* Delete / cross button */}
+                      <button
+                        onClick={() => deleteFile(file.document_id)}
+                        className='text-gray-400 hover:text-red-500'
+                      >
+                        <X className='w-4 h-4' />
+                      </button>
                     </div>
                   ))}
                 </div>

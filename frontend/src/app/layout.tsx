@@ -1,11 +1,19 @@
-import type React from 'react';
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
-import { Analytics } from '@vercel/analytics/next';
+import { Geist, Geist_Mono } from 'next/font/google';
 import { AuthProvider } from '@/hooks/use-auth';
 import { Suspense } from 'react';
 import './globals.css';
+import { Toaster } from 'sonner';
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
   title: 'Document Chat - AI-Powered Document Analysis',
@@ -20,11 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <Suspense fallback={<div>Loading...</div>}>
+          <Toaster position='bottom-right' richColors />
           <AuthProvider>{children}</AuthProvider>
         </Suspense>
-        <Analytics />
       </body>
     </html>
   );

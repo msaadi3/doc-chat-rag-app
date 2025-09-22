@@ -1,7 +1,6 @@
 from app.utils.file_processing import load_document, chunk_data, create_embeddings, embed_query
 from app.core.chroma_connection import get_chroma_collection
 from chromadb.api.models.Collection import Collection
-from app.core.chroma_connection import get_chroma_collection
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel
 from fastapi import File, UploadFile, Depends, APIRouter
@@ -10,6 +9,7 @@ import uuid
 import os
 import aiofiles
 from app.auth.dependencies import get_current_user
+from app.rag.dependencies import enforce_upload_limit
 
 router = APIRouter(
     prefix="/rag",
@@ -21,9 +21,9 @@ UPLOAD_DIR = "uploads/"
 
 
 @router.post("/uploadfile/")
-async def upload_file(file: UploadFile = File(...), collection: Collection = Depends(get_chroma_collection), user: dict = Depends(get_current_user)):
+async def upload_file(file: UploadFile = File(...), collection: Collection = Depends(get_chroma_collection), user: dict = Depends(get_current_user), _=Depends(enforce_upload_limit)):
     doc_id = str(uuid.uuid4())
-    file_name = f"{user['email']}_{doc_id}_{file.filename}"
+    file_name = f"{doc_id}_{file.filename}"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     file_path = os.path.join(UPLOAD_DIR, file_name)
 
@@ -66,7 +66,6 @@ async def upload_file(file: UploadFile = File(...), collection: Collection = Dep
 # Retrieval Endpoint (/query/)
 class QueryRequest(BaseModel):
     query: str
-    top_k: int = 5
 
 
 # Global in-memory store (replace with DB/Redis later if needed)
@@ -94,10 +93,12 @@ async def query_documents(
     #  Embed the query
     query_embedding = embed_query(request.query)
 
+    top_k: int = 5
+
     #  Search in Chroma
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=request.top_k,
+        n_results=top_k,
         where={"user_email": user["email"]},
         include=["documents", "metadatas", "distances"],
     )
@@ -120,6 +121,7 @@ async def query_documents(
     # Filter for relevant docs only
     relevant_chunks = [c for c in matched_chunks if c["score"] < 0.6]
     context = "\n\n".join([c["text"] for c in relevant_chunks])
+
     # Retrieve user queries history
     history = "\n".join(user_queries_history.get(user["email"], []))
 
