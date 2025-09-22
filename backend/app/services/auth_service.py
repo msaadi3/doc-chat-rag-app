@@ -33,7 +33,7 @@ class AuthService:
         user_info = await oauth.google.userinfo(token=token)
         request.session["user"] = dict(user_info)
 
-        return RedirectResponse(url="http://localhost:3000/chat")
+        return RedirectResponse(url="https://doc-chat-rag-app-bosg.vercel.app/chat")
 
     @staticmethod
     async def logout(request: Request) -> JSONResponse:

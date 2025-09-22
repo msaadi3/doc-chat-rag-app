@@ -19,6 +19,10 @@ export default function Chat() {
   const { user, logout, isLoading } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
+  if (!user) {
+    return <LoginForm />;
+  }
+
   const handleFilesUploaded = async (file: File) => {
     if (uploadedFiles.length == 5) {
       toast.error('You can upload a maximum of 5 files.');
@@ -118,9 +122,9 @@ export default function Chat() {
     );
   }
 
-  if (!user) {
-    return <LoginForm />;
-  }
+  // if (!user) {
+  //   return <LoginForm />;
+  // }
 
   return (
     <div className='min-h-screen bg-background'>
