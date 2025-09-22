@@ -38,8 +38,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_headers=["Access-Control-Allow-Headers", 'Content-Type',
-                   'Authorization', 'Access-Control-Allow-Origin'],
 )
 
 # Include routers
