@@ -16,7 +16,7 @@ export function LoginForm() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    window.location.href = 'http://localhost:8000/auth/login';
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
   };
 
   return (

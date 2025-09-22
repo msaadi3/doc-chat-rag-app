@@ -10,40 +10,46 @@ import { Card } from '@/components/ui/card';
 import { FileText, MessageSquare, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function Chat() {
-  const { user, login, logout, isLoading } = useAuth();
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+type UploadedFile = {
+  document_id: string;
+  filename: string;
+};
 
-  const handleFilesUploaded = async (files: File[]) => {
+export default function Chat() {
+  const { user, logout, isLoading } = useAuth();
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  const handleFilesUploaded = async (file: File) => {
     if (uploadedFiles.length == 5) {
       toast.error('You can upload a maximum of 5 files.');
       return;
     }
 
-    setUploadedFiles((prev) => [...prev, ...files]);
+    // setUploadedFiles((prev) => [...prev, file]);
 
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-      try {
-        toast.info(`Uploading ${file.name}, please wait...`);
-        const response = await fetch('http://localhost:8000/rag/uploadfile/', {
+    try {
+      toast.info(`Uploading ${file.name}, please wait...`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/rag/uploadfile/`,
+        {
           method: 'POST',
           body: formData,
           credentials: 'include',
-        });
-
-        if (!response.ok) {
-          toast.error('Failed to upload file');
-          console.log('Failed to upload file:', response);
-          throw new Error('Upload failed');
         }
+      );
 
-        toast.success('File uploaded successfully');
-      } catch (error) {
-        console.error('Error uploading file:', error);
+      if (!response.ok) {
+        toast.error('Failed to upload file');
+        console.log('Failed to upload file:', response);
+        throw new Error('Upload failed');
       }
+
+      toast.success('File uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading file:', error);
     }
   };
 
@@ -51,10 +57,13 @@ export default function Chat() {
     async function fetchFiles() {
       toast.info('Fetching uploaded files, please wait...');
       try {
-        const response = await fetch('http://localhost:8000/files/get-files', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/files/get-files`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
 
         if (!response.ok) {
           toast.error('Failed to fetch files');
@@ -76,7 +85,7 @@ export default function Chat() {
   async function deleteFile(documentId: string) {
     try {
       const response = await fetch(
-        `http://localhost:8000/files/delete-file/${documentId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/files/delete-file/${documentId}`,
         {
           method: 'DELETE',
           credentials: 'include',
@@ -110,7 +119,7 @@ export default function Chat() {
   }
 
   if (!user) {
-    return <LoginForm onLogin={login} />;
+    return <LoginForm />;
   }
 
   return (

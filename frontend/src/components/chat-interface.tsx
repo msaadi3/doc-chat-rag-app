@@ -17,9 +17,13 @@ interface Message {
   timestamp: Date;
   documentContext?: string[];
 }
+type UploadedFile = {
+  document_id: string;
+  filename: string;
+};
 
 interface ChatInterfaceProps {
-  uploadedFiles: File[];
+  uploadedFiles: UploadedFile[];
   className?: string;
 }
 
@@ -65,12 +69,15 @@ export function ChatInterface({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/rag/query', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userMessage.content }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/rag/query`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: userMessage.content }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to get response from backend');
@@ -85,7 +92,7 @@ export function ChatInterface({
         timestamp: new Date(),
         documentContext:
           uploadedFiles.length > 0
-            ? uploadedFiles.map((f) => f.name)
+            ? uploadedFiles.map((f) => f.filename)
             : undefined,
       };
 
@@ -96,7 +103,7 @@ export function ChatInterface({
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          content: '⚠️ Error: Could not connect to the backend.',
+          content: 'Error: Could not connect to the backend.',
           role: 'assistant',
           timestamp: new Date(),
         },
@@ -219,7 +226,7 @@ export function ChatInterface({
                 key={index}
                 className='inline-flex items-center px-2 py-1 rounded-md bg-accent/10 text-accent text-xs'
               >
-                {file.name}
+                {file.filename}
               </span>
             ))}
           </div>

@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch('http://localhost:8000/auth/me', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
           credentials: 'include', // send cookies
         });
         if (res.ok) {
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    const res = await fetch('http://localhost:8000/auth/logout', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
       credentials: 'include',
     });
 
