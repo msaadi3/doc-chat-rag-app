@@ -26,7 +26,7 @@ app.add_middleware(
     secret_key=settings.session_secret,
     session_cookie="session",
     max_age=86400,  # 24 hours in seconds
-    same_site="lax",  # Required for cross-site requests
+    same_site="none",  # Required for cross-site requests
     https_only=True,   # Must be True in production for same_site="none"
     # domain=None,       # Let browser handle domain
     path="/",          # Ensure cookie is available for all paths
