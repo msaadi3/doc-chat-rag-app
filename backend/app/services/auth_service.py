@@ -39,15 +39,15 @@ class AuthService:
             url="https://doc-chat-rag-app-bosg.vercel.app/chat"
         )
 
-        redirect_response.set_cookie(
-            key="session",
-            value=token["access_token"],
-            max_age=86400,   # 24 hours
-            secure=True,     # Required for SameSite=None
-            httponly=True,   # Protect against JS access
-            samesite="none",  # Allow cross-site
-            path="/",
-        )
+        # redirect_response.set_cookie(
+        #     key="session",
+        #     value=token["access_token"],
+        #     max_age=86400,   # 24 hours
+        #     secure=True,     # Required for SameSite=None
+        #     httponly=True,   # Protect against JS access
+        #     samesite="none",  # Allow cross-site
+        #     path="/",
+        # )
 
         return redirect_response
 
