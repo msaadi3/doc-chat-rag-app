@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Response
 from starlette.responses import RedirectResponse
 from fastapi.responses import JSONResponse
 from authlib.integrations.starlette_client import OAuth
@@ -34,22 +34,22 @@ class AuthService:
 
         request.session["user"] = dict(user_info)
 
-        response = RedirectResponse(
+        # Redirect response with cookie
+        redirect_response = RedirectResponse(
             url="https://doc-chat-rag-app-bosg.vercel.app/chat"
         )
 
-        # Manually set the cookie with proper settings for cross-site
-        response.set_cookie(
+        redirect_response.set_cookie(
             key="session",
-            value=token,
-            max_age=86400,  # 24 hours
-            secure=True,    # Required for SameSite=None
-            httponly=True,  # Prevents XSS
-            samesite="none",  # Allows cross-site usage
+            value=token["access_token"],
+            max_age=86400,   # 24 hours
+            secure=True,     # Required for SameSite=None
+            httponly=True,   # Protect against JS access
+            samesite="none",  # Allow cross-site
             path="/",
         )
 
-        return response
+        return redirect_response
 
     @staticmethod
     async def logout(request: Request) -> JSONResponse:
