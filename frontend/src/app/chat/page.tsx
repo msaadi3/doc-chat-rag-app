@@ -27,6 +27,7 @@ export default function Chat() {
       formData.append('file', file);
 
       try {
+        toast.info(`Uploading ${file.name}, please wait...`);
         const response = await fetch('http://localhost:8000/rag/uploadfile/', {
           method: 'POST',
           body: formData,
@@ -48,6 +49,7 @@ export default function Chat() {
 
   useEffect(() => {
     async function fetchFiles() {
+      toast.info('Fetching uploaded files, please wait...');
       try {
         const response = await fetch('http://localhost:8000/files/get-files', {
           method: 'GET',
@@ -62,7 +64,7 @@ export default function Chat() {
 
         const data = await response.json();
         console.log('Fetched files:', data.files);
-
+        toast.success('Files fetched successfully');
         setUploadedFiles(data.files);
       } catch (error) {
         console.error('Error while fetching files', error);

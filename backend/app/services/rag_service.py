@@ -5,7 +5,7 @@ from fastapi import UploadFile, Depends, HTTPException, File
 from chromadb.api.models.Collection import Collection
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from app.utils.file_utils import load_document, chunk_data, create_embeddings, embed_query
+from app.utils.rag_utils import load_document, chunk_data, create_embeddings, embed_query
 from app.core.chroma_connection import get_chroma_collection
 from app.core.config import settings
 from app.dependencies import get_current_user, enforce_upload_limit
@@ -13,12 +13,11 @@ from app.dependencies import get_current_user, enforce_upload_limit
 
 UPLOAD_DIR = "uploads/"
 
-# In-memory query history (replace with DB/Redis in prod)
+# In-memory query history
 user_queries_history = {}  # { email: [query1, query2, ...] }
 
 
 def add_user_query(user_email: str, query: str):
-    """Store recent queries in memory (max 20)."""
     if user_email not in user_queries_history:
         user_queries_history[user_email] = []
     user_queries_history[user_email].append(query)

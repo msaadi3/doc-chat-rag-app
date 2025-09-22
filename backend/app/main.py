@@ -28,7 +28,7 @@ app.add_middleware(
     secret_key=settings.session_secret,
     session_cookie="session",       # optional
     same_site="lax",               # set "lax" or "strict" in non-cross-site cases
-    https_only=False,               # set True in production (HTTPS)
+    https_only=(settings.environment == "production"),
 )
 
 # Include routers

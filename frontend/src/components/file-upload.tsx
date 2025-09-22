@@ -165,7 +165,7 @@ export function FileUpload({
         onFilesUploaded(validFiles);
       }
     },
-    [acceptedTypes, maxSize, maxFiles, onFilesUploaded]
+    [onFilesUploaded]
   );
 
   return (

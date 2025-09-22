@@ -27,5 +27,8 @@ class Settings(BaseSettings):
     # cookie_secure: bool = Field(False, alias="COOKIE_SECURE")
     # cookie_samesite: str = Field("lax", alias="COOKIE_SAMESITE")
 
+    # Environment
+    environment: str = Field(..., alias="ENVIRONMENT")
+
 
 settings = Settings()
