@@ -31,7 +31,9 @@ class AuthService:
 
         # Try parsing ID token, fallback to userinfo
         user_info = await oauth.google.userinfo(token=token)
+
         request.session["user"] = dict(user_info)
+
         response = RedirectResponse(
             url="https://doc-chat-rag-app-bosg.vercel.app/chat")
         # response.set_cookie(
@@ -42,6 +44,22 @@ class AuthService:
         #     samesite="none",
         #     path="/"
         # )
+        # Create redirect response
+        response = RedirectResponse(
+            url="https://doc-chat-rag-app-bosg.vercel.app/chat"
+        )
+
+        # Manually set the cookie with proper settings for cross-site
+        # response.set_cookie(
+        #     key="user_session",
+        #     value=token,  # Or create a JWT token
+        #     max_age=86400,  # 24 hours
+        #     secure=True,    # Required for SameSite=None
+        #     httponly=True,  # Prevents XSS
+        #     samesite="none",  # Allows cross-site usage
+        #     path="/",
+        # )
+
         return response
 
         # return RedirectResponse(url="https://doc-chat-rag-app-bosg.vercel.app/chat")

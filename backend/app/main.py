@@ -14,12 +14,22 @@ logging.basicConfig(level=logging.ERROR, filename='logs.txt')
 app = FastAPI()
 
 
+# app.add_middleware(
+#     SessionMiddleware,
+#     secret_key=settings.session_secret,
+#     session_cookie="session",       # cookie name
+#     same_site="none",               # set "lax" or "strict" in non-cross-site cases
+#     https_only=(settings.environment == "production"),
+# )
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret,
-    session_cookie="session",       # cookie name
-    same_site="none",               # set "lax" or "strict" in non-cross-site cases
-    https_only=(settings.environment == "production"),
+    session_cookie="session",
+    max_age=86400,  # 24 hours in seconds
+    same_site="none",  # Required for cross-site requests
+    https_only=True,   # Must be True in production for same_site="none"
+    domain=None,       # Let browser handle domain
+    path="/",          # Ensure cookie is available for all paths
 )
 
 app.add_middleware(
