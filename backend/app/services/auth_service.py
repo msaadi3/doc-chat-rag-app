@@ -32,8 +32,19 @@ class AuthService:
         # Try parsing ID token, fallback to userinfo
         user_info = await oauth.google.userinfo(token=token)
         request.session["user"] = dict(user_info)
+        response = RedirectResponse(
+            url="https://doc-chat-rag-app-bosg.vercel.app/chat")
+        # response.set_cookie(
+        #     key="session",
+        #     value="YOUR_SESSION_VALUE",
+        #     secure=True,
+        #     httponly=True,
+        #     samesite="none",
+        #     path="/"
+        # )
+        return response
 
-        return RedirectResponse(url="https://doc-chat-rag-app-bosg.vercel.app/chat")
+        # return RedirectResponse(url="https://doc-chat-rag-app-bosg.vercel.app/chat")
 
     @staticmethod
     async def logout(request: Request) -> JSONResponse:

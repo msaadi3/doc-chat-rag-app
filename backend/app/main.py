@@ -15,20 +15,19 @@ app = FastAPI()
 
 
 app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.session_secret,
+    session_cookie="session",       # cookie name
+    same_site="none",               # set "lax" or "strict" in non-cross-site cases
+    https_only=(settings.environment == "production"),
+)
+
+app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-
-
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=settings.session_secret,
-    session_cookie="session",       # optional
-    same_site="none",               # set "lax" or "strict" in non-cross-site cases
-    https_only=(settings.environment == "production"),
 )
 
 # Include routers
